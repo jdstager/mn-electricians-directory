@@ -1,0 +1,32 @@
+{
+  "postal": "MN",
+  "state_name": "Minnesota",
+  "agency_name": "MN DLI",
+  "site_name": "Minnesota Electricians Directory",
+  "trade_noun": "Electricians",
+  "show_email": true,
+  "verify_url": "https://www.dli.mn.gov/license-and-registration-lookup",
+  "verify_label": "DLI License & Registration Lookup",
+  "source_name": "the Minnesota Department of Labor and Industry (DLI) Construction Codes and Licensing Division public license registry",
+  "class_rank": {
+    "Electrical Contractor (Class A)": 3,
+    "Electrical Contractor (Class B)": 3,
+    "Master Electrician (Class A)": 2,
+    "Master Electrician (Class B)": 2,
+    "Journeyworker Electrician (Class A)": 1,
+    "Journeyworker Electrician (Class B)": 1,
+    "Maintenance Electrician": 1
+  },
+  "class_badge": {
+    "Electrical Contractor (Class A)": "EC-A",
+    "Electrical Contractor (Class B)": "EC-B",
+    "Master Electrician (Class A)": "ME-A",
+    "Master Electrician (Class B)": "ME-B",
+    "Journeyworker Electrician (Class A)": "JW-A",
+    "Journeyworker Electrician (Class B)": "JW-B",
+    "Maintenance Electrician": "MN-E"
+  },
+  "methodology_source_html": "<h2>Source</h2>\n<p>Every listing is extracted from the Minnesota Department of Labor and Industry (DLI)\n— Construction Codes and Licensing Division — public license registry file for the\nelectrical program (<em>MNDLILicRegCertExport_Electrical.csv</em>, published at\nsecure.doli.state.mn.us/ccld/data/), pulled on {as_of}. The file covers {rows} rows.\nListed license classes:</p>\n<p><strong>Electrical Contractor (Class A / Class B)</strong> — the business license to sell and\nperform electrical work; <strong>Master Electrician (Class A / B)</strong> and\n<strong>Journeyworker Electrician (Class A / B)</strong> — individual credentials;\n<strong>Maintenance Electrician</strong> — a limited individual credential.</p>\n<p><strong>Excluded on purpose</strong> (and why): <em>registered <strong>unlicensed</strong> electricians</em>\n—the largest row group in the file—by definition hold no electrician license and are not\npresented here as electricians; <em>power-limited technicians</em> and\n<em>technology-systems contractors</em> (the low-voltage trade, a different license family);\n<em>satellite / sign installers</em>; <em>linemen</em> (utility trade);\nand <em>registered electrical employers</em> (an employer registration, not a worker license).\nStatuses treated as inactive: expired, revoked, suspended, and voluntary terminations — none are listed.</p>",
+  "methodology_inclusion_extra_html": "<li>Personal licenses (journeyworker / master) without a business or DBA name are listed as\nsolo operators at the address on file. Licenses whose city field cannot be resolved to a\nMinnesota municipality (~{dropped_no_city} rows, including entries with malformed registry\naddresses) are excluded from city listings; the <a href=\"https://www.dli.mn.gov/license-and-registration-lookup\" rel=\"nofollow\">DLI lookup</a>\nremains the verification source of record.</li>",
+  "ordering_html": "<li>License class held: contractor licenses first, then master electricians, then journeyworker / maintenance.</li>\n<li>Registry tenure — earlier first issuance ranks first (shown on each listing as “licensed since”).</li>\n<li>Clean registry record — licenses flagged with an enforcement action rank below unflagged ones, and every flagged listing discloses that flag.</li>\n<li>Number of active licenses held at that address.</li>\n<li>Telephone number on file (contactable businesses first).</li>\n<li>Alphabetical by name — deterministic.</li>"
+}
