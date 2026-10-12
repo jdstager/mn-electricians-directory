@@ -1,6 +1,6 @@
 # 90-day verdict protocol — Minnesota Electricians Directory
 
-D0 anchor: first successful Pages deploy (add date here once live).
+D0 anchor: **2026-10-08** (first Pages deploy).
 Texas lab runs its own parallel log; Minnesota is the Stage-2 territory (local partner advantage).
 
 ## Weekly log (Mondays 09:00 CT reminder, with the TX log)
