@@ -2,5 +2,4 @@ data/
 site/dist
 site/dist.staged
 site/dist.prev
-verdict-log.md
 __pycache__/
