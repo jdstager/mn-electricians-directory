@@ -33,5 +33,7 @@
   "indexnow_key": "c91e846748cea8befe9937e6da9ade2a",
   "indexnow_key_location": "https://jdstager.github.io/c91e846748cea8befe9937e6da9ade2a.txt",
   "canonical_base": "https://jdstager.github.io/mn-electricians-directory",
-  "d0": "2026-10-08"
+  "d0": "2026-10-08",
+  "claims_enabled": false,
+  "contact_email": ""
 }

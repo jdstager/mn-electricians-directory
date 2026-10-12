@@ -84,7 +84,7 @@ PAGE_HEAD = """<!doctype html>
 <body>
 <header class="site">
   <a class="brand" href="{home}">{site_name}</a>
-  <nav><a href="{state_href}">All cities</a> · <a href="{meth_href}">Methodology</a></nav>
+  <nav><a href="{state_href}">All cities</a> · <a href="{meth_href}">Methodology</a>{claim_nav}</nav>
 </header>
 <main>
 {body}
@@ -97,12 +97,21 @@ PAGE_HEAD = """<!doctype html>
 </html>"""
 
 
+CLAIMS = bool(CONFIG.get("claims_enabled")) and bool(CONFIG.get("contact_email"))
+CLAIM_NAV = ' · <a href="{href}">Claim a listing</a>'
+CLAIM_HREF = "{d}claim/index.html"
+
+
+CLAIMS = bool(CONFIG.get("claims_enabled")) and bool(CONFIG.get("contact_email"))
+CLAIM_NAV = ' · <a href="{href}">Claim a listing</a>'
+
 def page(title, desc, depth, body, jsonld=""):
     d = up(depth)
     return PAGE_HEAD.format(
         title=ESCAPE(title), desc=ESCAPE(desc), css=d + "static/site.css",
         home=d + "index.html",
         state_href=d + "electricians/index.html", meth_href=d + "methodology/index.html",
+        claim_nav=(CLAIM_NAV.format(href=d + "claim/index.html") if CLAIMS else ""),
         tdlr=TDLR_SEARCH, verify_label=TDLR_LABEL, as_of=AS_OF,
         source_name=CONFIG["source_name"], site_name=SITE_NAME, body=body, jsonld=jsonld)
 
@@ -312,6 +321,7 @@ Cities with three or more licensed businesses have their own page; smaller towns
         return f"electricians/{cslug}/{e['slug']}/index.html"
 
     def write_entity_page(e, cslug, disp, city_page_exists=True, county=""):
+        claim_d3 = ('<p class="meta">This is your business? <a href="' + up(3) + 'claim/index.html">Claim your listing</a> &mdash; verification is free; order never changes for anyone.</p>' if CLAIMS else "")
         licbits = ""
         for l in sorted(e["lics"], key=lambda x: -CLASS_RANK.get(x["class"], 0)):
             licbits += f"<li>{ESCAPE(l['class'])} — license #{ESCAPE(l['n'])}, valid through {ESCAPE(l['exp'])}</li>"
@@ -339,6 +349,7 @@ Cities with three or more licensed businesses have their own page; smaller towns
 recommendation. Before hiring any electrician, you can independently verify each license at
 <a href="{TDLR_SEARCH}" rel="nofollow">{TDLR_LABEL}</a> and confirm the permit history with your city.</p>
 <p class="meta">Listing changes, corrections, or removal requests: see <a href="{up(3)}methodology/index.html">methodology</a>.</p>
+{claim_d3}
 """
         ld2 = {"@context": "https://schema.org", "@type": "Electrician",
                "name": e["name"], "address": addr,
@@ -418,6 +429,35 @@ removal requests are honored promptly, no conditions.</p>
         f"Methodology — {SITE_NAME}",
         "Data source, inclusion rules, ranking signals, and removal policy.",
         1, meth))
+
+    # claim page (published only once contact channel exists)
+    if CLAIMS:
+        ce = CONFIG["contact_email"]
+        claim = (
+            '<div class="crumbs"><a href="' + up(1) + 'index.html">Home</a> &rsaquo; Claim a listing</div>'
+            "<h1>Claim your listing</h1>"
+            '<p class="lede">Claiming is free, takes one email, and never changes your position in '
+            'any list &mdash; order stays registry-facts-only for everyone.</p>'
+            "<h2>How to claim</h2><ol>"
+            '<li>Find your listing (search this site for your city).</li>'
+            '<li>Email <strong>' + ESCAPE(ce) + '</strong> from the address on file in the '
+            + ESCAPE(CONFIG["agency_name"]) + ' registry &mdash; or from your business email domain '
+            "on record &mdash; with your license number and city.</li>"
+            "<li>We verify against the registry and mark the listing claimed. Allow a few business days.</li>"
+            "</ol><h2>What claiming unlocks</h2><ul>"
+            "<li>Edit your description, service list, and hours; add your website (marked owner-submitted).</li>"
+            '<li>A &ldquo;claimed&rdquo; badge once verified contact is established.</li>'
+            "</ul><h2>What claiming does not do</h2>"
+            "<p>No position changes, no paid placement, no removing other listings &mdash; the "
+            "ranking is registry facts only, unchanged for every business in the directory.</p>"
+            "<p>Questions or corrections: " + ESCAPE(ce) + "</p>"
+        )
+        (DIST / "claim").mkdir(parents=True, exist_ok=True)
+        (DIST / "claim/index.html").write_text(page(
+            "Claim your listing - " + SITE_NAME,
+            "Free verified claim for your directory listing; enhanced data, same registry-facts ranking for everyone.",
+            1, claim))
+        urls.append(("claim/index.html", 0.4, "monthly"))
 
     # ---------------- sitemap + robots
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
