@@ -20,3 +20,4 @@ Playbook: [recommendation-use-both-plays-jesse-cunningham.md](../recommendation-
 
 ## Live
 - staging: https://jdstager.github.io/mn-electricians-directory/ (after Pages enablement; weekly Thursday auto-rebuild)
+6. **Bing Webmaster Tools** (5 min, free): create at bing.com/webmasters, "import from GSC" or add site minnesotaelectriciansdirectory.com (and the staging host) — send me the verification meta/file token and I place it; this becomes the real indexation instrument for the weekly log.
