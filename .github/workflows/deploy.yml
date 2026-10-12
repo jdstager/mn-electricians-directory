@@ -48,4 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # IndexNow 403s datacenter runner IPs; real submissions run locally
+      # during the weekly log (works from residential IPs)
       - run: python3 scripts/indexnow.py
+        continue-on-error: true
