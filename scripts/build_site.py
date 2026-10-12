@@ -78,6 +78,9 @@ PAGE_HEAD = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{desc}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{desc}">
+<link rel="canonical" href="{canonical}">
 <link rel="stylesheet" href="{css}">
 {jsonld}
 </head>
@@ -99,19 +102,18 @@ PAGE_HEAD = """<!doctype html>
 
 CLAIMS = bool(CONFIG.get("claims_enabled")) and bool(CONFIG.get("contact_email"))
 CLAIM_NAV = ' · <a href="{href}">Claim a listing</a>'
-CLAIM_HREF = "{d}claim/index.html"
+
+CANON = CONFIG.get("canonical_base", "")
 
 
-CLAIMS = bool(CONFIG.get("claims_enabled")) and bool(CONFIG.get("contact_email"))
-CLAIM_NAV = ' · <a href="{href}">Claim a listing</a>'
-
-def page(title, desc, depth, body, jsonld=""):
+def page(title, desc, depth, body, jsonld="", path=""):
     d = up(depth)
     return PAGE_HEAD.format(
         title=ESCAPE(title), desc=ESCAPE(desc), css=d + "static/site.css",
         home=d + "index.html",
         state_href=d + "electricians/index.html", meth_href=d + "methodology/index.html",
         claim_nav=(CLAIM_NAV.format(href=d + "claim/index.html") if CLAIMS else ""),
+        canonical=((CANON + "/" + path) if path else (CANON + "/")),
         tdlr=TDLR_SEARCH, verify_label=TDLR_LABEL, as_of=AS_OF,
         source_name=CONFIG["source_name"], site_name=SITE_NAME, body=body, jsonld=jsonld)
 
@@ -258,7 +260,7 @@ ranked by verifiable license signals only.</p>
     (DIST / "index.html").write_text(page(
         f"{SITE_NAME} — licensed electricians in {rep['cities']:,} {STATE_NAME} cities",
         f"Verified directory of {total_entities:,} state-licensed electrical businesses in {STATE_NAME}, from the {CONFIG['agency_name']} registry as of {AS_OF}.",
-        0, home_body))
+        0, home_body, path=""))
 
     # ---------------- state page (all cities by county)
     county_cities = defaultdict(list)
@@ -286,7 +288,7 @@ Cities with three or more licensed businesses have their own page; smaller towns
     (DIST / "electricians/index.html").write_text(
         page(f"All cities — {SITE_NAME}",
              f"Complete city index: licensed electrical businesses by {STATE_NAME} city, from the {CONFIG['agency_name']} registry ({AS_OF}).",
-             1, state_body))
+             1, state_body, path="electricians/"))
 
     # ---------------- county rollups for small towns
     county_urls = []
@@ -310,7 +312,7 @@ Cities with three or more licensed businesses have their own page; smaller towns
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(page(f"{proper_case(cn.title())} County — {SITE_NAME}",
                             f"Licensed electrical businesses in small-town {proper_case(cn.title())} County, {STATE} ({AS_OF}).",
-                            2, body, ""))
+                            2, body, "", path=f"county/{cslug}/"))
         county_urls.append(f"county/{cslug}/index.html")
 
     # ---------------- city pages + listing pages
@@ -359,7 +361,8 @@ recommendation. Before hiring any electrician, you can independently verify each
         out2.write_text(page(f'{e["name"]} — electrician in {disp} {STATE} — license {e["lics"][0]["n"]}',
                              f'{e["name"]}: {", ".join(e["classes"])} — licensed electrician at {e["line1"]}, {disp} {STATE}. {STATE_NAME} license info as of {AS_OF}.',
                              3, eb_body,
-                             f'<script type="application/ld+json">{json.dumps({k: v for k, v in ld2.items() if v}, ensure_ascii=False)}</script>'))
+                             f'<script type="application/ld+json">{json.dumps({k: v for k, v in ld2.items() if v}, ensure_ascii=False)}</script>',
+                             path=f"electricians/{cslug}/{e['slug']}/"))
         urls.append((entity_url(cslug, e), 0.4, "monthly"))
 
     done = set()
@@ -373,7 +376,8 @@ recommendation. Before hiring any electrician, you can independently verify each
         out.write_text(page(f"{TRADE} in {disp}, {STATE} ({len(ents)}) — {SITE_NAME}",
                             f"{len(ents)} state-licensed electrical businesses in {disp}, {STATE}, from the {CONFIG['agency_name']} registry as of {AS_OF}.",
                             2, body,
-                            f'<script type="application/ld+json">{ld}</script>'))
+                            f'<script type="application/ld+json">{ld}</script>',
+                            path=f"electricians/{cslug}/"))
         urls.append((f"electricians/{cslug}/index.html", 0.8, "weekly"))
         for e in ents:
             write_entity_page(e, cslug, disp, True, county_of.get(c, ""))
@@ -428,7 +432,7 @@ removal requests are honored promptly, no conditions.</p>
     (DIST / "methodology/index.html").write_text(page(
         f"Methodology — {SITE_NAME}",
         "Data source, inclusion rules, ranking signals, and removal policy.",
-        1, meth))
+        1, meth, path="methodology/"))
 
     # claim page (published only once contact channel exists)
     if CLAIMS:
@@ -456,7 +460,7 @@ removal requests are honored promptly, no conditions.</p>
         (DIST / "claim/index.html").write_text(page(
             "Claim your listing - " + SITE_NAME,
             "Free verified claim for your directory listing; enhanced data, same registry-facts ranking for everyone.",
-            1, claim))
+            1, claim, path="claim/"))
         urls.append(("claim/index.html", 0.4, "monthly"))
 
     # ---------------- sitemap + robots
@@ -464,7 +468,7 @@ removal requests are honored promptly, no conditions.</p>
     sm += [f"<url><loc>/{u}</loc><priority>{p}</priority></url>" for u, p, _ in urls]
     sm.append("</urlset>")
     (DIST / "sitemap.xml").write_text("\n".join(sm))
-    (DIST / "robots.txt").write_text("User-agent: *\nAllow: /\nSitemap: /sitemap.xml\n")
+    (DIST / "robots.txt").write_text("User-agent: *\nAllow: /\nSitemap: " + CANON + "/sitemap.xml\n")
 
     n_files = sum(1 for _ in DIST.rglob("index.html"))
     print("total pages:", n_files, "sitemap urls:", len(urls))
