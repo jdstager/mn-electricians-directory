@@ -2,9 +2,11 @@
 """Ping IndexNow (Bing/Yandex/Seznam) with every live sitemap URL.
 
 Key file lives at <host>/<key>.txt (root repo jdstager.github.io).
-202 = accepted. Safe to re-run (engines dedupe re-submissions).
+202 = accepted. Batches capped at 100 with 1.5s spacing — larger batches
+from residential/datacenter IPs draw 403s. Per-batch failures are logged,
+not raised. Safe to re-run (engines dedupe).
 """
-import json, re, urllib.request
+import json, re, time, urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -21,11 +23,19 @@ urls = [f"{BASE}/{p.lstrip('/')}" for p in paths]
 if not urls:
     raise SystemExit("no urls in live sitemap")
 print(f"{CONFIG['site_name']}: submitting {len(urls)} urls, host={HOST}")
-for i in range(0, len(urls), 1000):
-    batch = urls[i:i+1000]
+ok = err = 0
+for i in range(0, len(urls), 100):
+    batch = urls[i:i+100]
     body = json.dumps({"host": HOST, "key": KEY, "keyLocation": KEYLOC, "urlList": batch}).encode()
     req = urllib.request.Request("https://api.indexnow.org/indexnow", data=body,
                                  headers={"Content-Type": "application/json; charset=utf-8"})
-    with urllib.request.urlopen(req, timeout=180) as r:
-        print(f"  batch {i//1000}: {len(batch)} urls -> HTTP {r.status}")
-print("indexnow done")
+    try:
+        with urllib.request.urlopen(req, timeout=180) as resp:
+            code = resp.status
+        ok += len(batch)
+        print(f"  batch {i//100}: {len(batch)} urls -> HTTP {code}")
+    except Exception as e:
+        err += len(batch)
+        print(f"  batch {i//100}: {len(batch)} urls -> FAIL {e}")
+    time.sleep(1.5)
+print(f"indexnow done: accepted={ok}, rejected={err}")
