@@ -35,5 +35,6 @@
   "canonical_base": "https://jdstager.github.io/mn-electricians-directory",
   "d0": "2026-10-08",
   "claims_enabled": false,
-  "contact_email": ""
+  "contact_email": "",
+  "custom_domain": "minnesotaelectriciansdirectory.com"
 }
