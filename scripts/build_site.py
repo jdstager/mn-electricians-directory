@@ -105,7 +105,7 @@ PAGE_HEAD = """<!doctype html>
 CLAIMS = bool(CONFIG.get("claims_enabled")) and bool(CONFIG.get("contact_email"))
 CLAIM_NAV = ' · <a href="{href}">Claim a listing</a>'
 
-CANON = CONFIG.get("canonical_base", "")
+CANON = CONFIG.get("canonical_base", "").rstrip("/")
 
 
 def page(title, desc, depth, body, jsonld="", path=""):
