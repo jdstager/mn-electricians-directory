@@ -19,7 +19,7 @@ BASE = CONFIG["canonical_base"].rstrip("/")
 with urllib.request.urlopen(f"{BASE}/sitemap.xml", timeout=120) as r:
     sm = r.read().decode()
 paths = re.findall(r"<loc>([^<]+)</loc>", sm)
-urls = [f"{BASE}/{p.lstrip('/')}" for p in paths]
+urls = [p if p.startswith("http") else f"{BASE}/{p.lstrip('/')}" for p in paths]
 if not urls:
     raise SystemExit("no urls in live sitemap")
 print(f"{CONFIG['site_name']}: submitting {len(urls)} urls, host={HOST}")

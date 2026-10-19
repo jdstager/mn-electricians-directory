@@ -467,12 +467,14 @@ removal requests are honored promptly, no conditions.</p>
 
     # ---------------- sitemap + robots
     sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    sm += [f"<url><loc>/{u}</loc><lastmod>{TODAY.ISO if False else str(date.today())}</lastmod><changefreq>{f}</changefreq><priority>{p}</priority></url>" for u, p, f in urls]
+    sm += [f"<url><loc>{CANON}/{u}</loc><lastmod>{TODAY.ISO if False else str(date.today())}</lastmod><changefreq>{f}</changefreq><priority>{p}</priority></url>" for u, p, f in urls]
     sm.append("</urlset>")
     (DIST / "sitemap.xml").write_text("\n".join(sm))
     (DIST / "robots.txt").write_text("User-agent: *\nAllow: /\nSitemap: " + CANON + "/sitemap.xml\n")
     if CONFIG.get("custom_domain"):
         (DIST / "CNAME").write_text(CONFIG["custom_domain"] + "\n")
+    if CONFIG.get("indexnow_key"):
+        (DIST / (CONFIG["indexnow_key"] + ".txt")).write_text(CONFIG["indexnow_key"])
 
     n_files = sum(1 for _ in DIST.rglob("index.html"))
     print("total pages:", n_files, "sitemap urls:", len(urls))
